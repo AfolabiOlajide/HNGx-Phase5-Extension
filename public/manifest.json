@@ -1,25 +1,22 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
-  "icons": [
-    {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+    "name": "Help Me Out",
+    "description": "A screen recording application for fostering a community of learning, helping and sharing",
+    "version": "1.0.0",
+    "manifest_version": 3,
+    "icons": {
+        "128": "./logo.png"
     },
-    {
-      "src": "logo192.png",
-      "type": "image/png",
-      "sizes": "192x192"
+    "background": {
+        "service_worker": "background.js"
     },
-    {
-      "src": "logo512.png",
-      "type": "image/png",
-      "sizes": "512x512"
-    }
-  ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+    "action": {
+        "default_popup": "index.html",
+        "default_icon": {
+            "16": "./logo.png",
+            "32": "./logo.png",
+            "128": "./logo.png"
+        }
+    },
+    "host_permissions": ["http://*/", "https://*/"],
+    "permissions": ["scripting", "tabs", "activeTab"]
 }
