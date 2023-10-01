@@ -9,14 +9,14 @@ import { BsMic } from "react-icons/bs";
 
 // local imports
 import Logo from "./assets/logo.png";
-import Controls from "./components/Controls";
+// import Controls from "./components/Controls";
 
 
 
 function App() {
   const [ cameraIsActive, setCameraIsActive ] = useState(false);
   const [ audioIsActive, setAudioIsActive ] = useState(false);
-  const [ controlIsActive, setControlIsActive ] = useState(true);
+  // const [ controlIsActive, setControlIsActive ] = useState(true);
 
 
   const handleCameraToggle = () => {
@@ -27,9 +27,9 @@ function App() {
     setAudioIsActive(prev => !prev);
   }
 
-  const handleControlActive = () => {
-    setControlIsActive(prev => !prev);
-  }
+  // const handleControlActive = () => {
+  //   setControlIsActive(prev => !prev);
+  // }
 
   function onStartRecording(){
     // select active and current window tab
@@ -124,7 +124,7 @@ function App() {
       </div>
 
       {/* Controls */}
-      <Controls active={controlIsActive}/>
+      {/* <Controls active={controlIsActive}/> */}
     </div>
   );
 }

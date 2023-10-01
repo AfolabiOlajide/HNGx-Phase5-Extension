@@ -138,11 +138,3 @@ function handleRedirect(id){
 }
 
 
-
-
-// mimeType
-
-// {
-//     videoId,
-//     blob
-// }
