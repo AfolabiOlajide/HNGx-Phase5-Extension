@@ -123,8 +123,8 @@ async function handleSendChunkToServer(chunk){
 
 // handle redirect
 function handleRedirect(id){
-    console.log(id);
-    const url = `http://localhost:3000/preview/${id}`;
+    const videoId = localStorage.getItem("videoId");
+    const url = `http://localhost:3000/preview/${videoId}`;
 
     let a = document.createElement("a");
     a.style.display = "none";
