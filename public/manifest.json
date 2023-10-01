@@ -17,6 +17,6 @@
             "128": "./logo.png"
         }
     },
-    "host_permissions": ["http://*/", "https://*/"],
+    "host_permissions": ["<all_urls>"],
     "permissions": ["scripting", "tabs", "activeTab"]
 }

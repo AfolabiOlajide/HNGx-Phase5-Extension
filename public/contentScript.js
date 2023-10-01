@@ -1,76 +1,76 @@
 /* eslint-disable no-undef */
-console.log("Help Me Out: Content Script Has Been Injected");
+console.log("Help Me Out Extension Content Script Has Been Injected");
 
 
-const trackedRecordedBlob = [];
 
 var recorder = null;
-let streamId;
+
 
 function onRecord(stream){
-    recorder = new MediaRecorder(stream);
-    streamId = stream.id;
+    // track chunks
+    const trackedRecordedChunks = [];
+    // track chunk blob
+    const chunkBlobs = []
+    var streamId = stream.id;
+    const options = { mimeType: "video/webm;codecs=vp9" };
+
+    recorder = new MediaRecorder(stream, options);
 
     console.log("recorder:", recorder);
     console.log("Stream: ", stream);
-    console.log("Stream ID: ", stream.id);
+    console.log("Stream ID: ", streamId);
 
 
     // start recoreder
-    recorder.start();
+    recorder.start()
+    startRecording();
+    async function startRecording(){
+        try {
+            const res = await fetch("https://weak-blue-hermit-crab-veil.cyclic.cloud/videos/create", {
+                method: "POST"
+            });
+            const data = await res.json();
+            console.log(data);
+            localStorage.setItem("videoId", data.data.id);
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
-    // whaat should happen when recoreder stops
-    recorder.onstop = async function() {
+
+
+    // what should happen when recoreder stops
+    recorder.onstop = function() {
         stream.getTracks().forEach((track) => {
             console.log("track: ", track);
-
             if(track.readyState === "live"){
                 track.stop();
             }
         })
 
-        console.log("tracked recorded blobs: ", trackedRecordedBlob)
-        
-        // convert recorded blob to base64
-        const base64DataArray = [];
-        for (const blob of trackedRecordedBlob) {
-            const base64Data = await blobToBase64(blob);
-            base64DataArray.push(base64Data);
-        }
-        console.log("bse64Data: ", base64DataArray);
-        
-        // convert base64 to buffer
-        const arrayBufferArray = [];
-        for (const base64Data of base64DataArray) {
-            const arrayBuffer = base64ToArrayBuffer(base64Data);
-            arrayBufferArray.push(arrayBuffer);
-        }
-        console.log("BufferData: ", arrayBufferArray);
+        handleRedirect();
+        console.log("tracked recorded chunks: ", trackedRecordedChunks);
+        console.log("tracked recorded chunkBlobs: ", chunkBlobs);
+        localStorage.removeItem("videoId");
     }
 
-    // 
-    recorder.ondataavailable = function(event){
-        trackedRecordedBlob.push(event.data);
-        let recordedBlob = event.data;
-        let url = URL.createObjectURL(recordedBlob);
+    // what happens when dataonavailable
+    recorder.ondataavailable = async function(event){
+        if(event.data.size > 0){
+            const blobChunk = new Blob([event.data], { type: "video/webm" });
+            trackedRecordedChunks.push(event.data);
+            chunkBlobs.push(blobChunk);
 
-        console.log("recorder Blob: ", recordedBlob);
-        console.log("URL: ", url);
-
-        let a = document.createElement("a");
-        a.style.display = "none";
-        a.href = url;
-        a.download = "screen-recording.webm";
-
-        document.body.appendChild(a);
-        a.click();
-
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+            handleSendChunkToServer(blobChunk)
+        }
     }
 }
 
 
+
+
+
+// message listener
 chrome.runtime.onMessage.addListener((message, sender, sendResponse)=> {
     // check for the message sent
     if(message.action === "request_recording"){
@@ -99,24 +99,50 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse)=> {
     }
 })
 
-// utility functions
-function blobToBase64(blob) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            resolve(reader.result.split(',')[1]); // Get the Base64 data (remove data URL header)
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-    });
+
+
+
+
+// utils functions
+// send chunk to server
+async function handleSendChunkToServer(chunk){
+    const videoId = localStorage.getItem("videoId");
+
+    try {
+        const res = await fetch(`https://weak-blue-hermit-crab-veil.cyclic.cloud/videos/save/${videoId}`, {
+            method: "POST",
+            body: chunk
+        })
+        const data = await res.json();
+        console.log(data);
+    } catch (error) {
+        
+    }
+    console.log("Chunk sending to server: ", chunk);
 }
 
-function base64ToArrayBuffer(base64) {
-    const binaryString = atob(base64);
-    const arrayBuffer = new ArrayBuffer(binaryString.length);
-    const uint8Array = new Uint8Array(arrayBuffer);
-    for (let i = 0; i < binaryString.length; i++) {
-        uint8Array[i] = binaryString.charCodeAt(i);
-    }
-    return arrayBuffer;
+// handle redirect
+function handleRedirect(id){
+    console.log(id);
+    const url = `http://localhost:3000/preview/${id}`;
+
+    let a = document.createElement("a");
+    a.style.display = "none";
+    a.href = url;
+    a.target = "_blank"
+
+    document.body.appendChild(a);
+    a.click();
+
+    document.body.removeChild(a);
 }
+
+
+
+
+// mimeType
+
+// {
+//     videoId,
+//     blob
+// }
