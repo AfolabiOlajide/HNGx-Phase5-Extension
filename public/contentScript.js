@@ -122,9 +122,9 @@ async function handleSendChunkToServer(chunk){
 }
 
 // handle redirect
-function handleRedirect(id){
+function handleRedirect(){
     const videoId = localStorage.getItem("videoId");
-    const url = `http://localhost:3000/preview/${videoId}`;
+    const url = `https://hngx-phase5-app.vercel.app/preview/${videoId}`;
 
     let a = document.createElement("a");
     a.style.display = "none";
